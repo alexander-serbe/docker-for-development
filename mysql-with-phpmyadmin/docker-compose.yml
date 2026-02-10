@@ -1,0 +1,50 @@
+version: "3.8"
+
+services:
+  mysql:
+    image: mysql:8.4
+    container_name: example_db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_LOWER_CASE_TABLE_NAMES: 0
+    # To expose MySQL ports to the outside, remove comments from 'ports' block and restart Docker Compose.
+    # (If the 'ports' block is currently not commented-out, add comments to hide ports again.)
+    # ports:
+    #   - "${MYSQL_PORT:-3306}:3306"
+    volumes:
+      - ./mysql-data:/var/lib/mysql
+      - ./mysql-init:/docker-entrypoint-initdb.d:ro
+    networks:
+      - internal
+
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: example_pma
+    restart: unless-stopped
+    depends_on:
+      - mysql
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+      PMA_USER: ${MYSQL_USER}
+      PMA_PASSWORD: ${MYSQL_PASSWORD}
+    ports:
+      - "${PHPMYADMIN_PORT:-8080}:80"
+    networks:
+      - internal
+
+networks:
+  internal:
+    driver: bridge
+
+# ----------------------------------------------------------------------------------------------------------------------
+# To start with database ports NOT exposed:
+# $ docker compose up -d mysql phpmyadmin
+
+# To start with database ports exposed:
+# docker compose --profile public-db up -d mysql_public phpmyadmin
+# ----------------------------------------------------------------------------------------------------------------------
