@@ -1,0 +1,6 @@
+# All environment files
+.env
+# MySQL data
+docker-mysql-template/mysql-data/
+# JetBrains IDEs
+.idea
